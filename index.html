@@ -79,6 +79,57 @@
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             }
         }
+        
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+        }
+        
+        .lightbox-nav {
+            position: absolute;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .lightbox-button {
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            background-color: rgba(0, 0, 0, 0.5);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -115,6 +166,20 @@
             </div>
         </div>
     </nav>
+
+    <!-- Lightbox for image viewing -->
+    <div id="lightbox" class="lightbox">
+        <span class="lightbox-close">&times;</span>
+        <div class="lightbox-nav">
+            <div class="lightbox-button" id="lightbox-prev">
+                <i class="fas fa-chevron-left"></i>
+            </div>
+            <div class="lightbox-button" id="lightbox-next">
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        </div>
+        <img class="lightbox-content" id="lightbox-img" src="" alt="">
+    </div>
 
     <!-- Main Content Sections -->
     <main>
@@ -200,7 +265,7 @@
                     
                     <!-- Project 2 -->
                     <div class="project-card bg-white rounded-lg overflow-hidden shadow-md">
-                        <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" alt="Fitness App" class="w-full h-48 object-cover">
+                        <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwa90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80" alt="Fitness App" class="w-full h-48 object-cover">
                         <div class="p-6">
                             <h3 class="text-xl font-semibold mb-2">Fitness App</h3>
                             <p class="text-gray-600 mb-4">Mobile application for workout and nutrition tracking.</p>
@@ -523,6 +588,50 @@
                 }, 5000);
             });
             
+            // Lightbox functionality
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxClose = document.querySelector('.lightbox-close');
+            const lightboxPrev = document.getElementById('lightbox-prev');
+            const lightboxNext = document.getElementById('lightbox-next');
+            
+            let currentImageIndex = 0;
+            let currentImages = [];
+            
+            function openLightbox(images, index) {
+                currentImages = images;
+                currentImageIndex = index;
+                lightboxImg.src = currentImages[currentImageIndex];
+                lightbox.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+            
+            function closeLightbox() {
+                lightbox.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+            
+            function showNextImage() {
+                currentImageIndex = (currentImageIndex + 1) % currentImages.length;
+                lightboxImg.src = currentImages[currentImageIndex];
+            }
+            
+            function showPrevImage() {
+                currentImageIndex = (currentImageIndex - 1 + currentImages.length) % currentImages.length;
+                lightboxImg.src = currentImages[currentImageIndex];
+            }
+            
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightboxNext.addEventListener('click', showNextImage);
+            lightboxPrev.addEventListener('click', showPrevImage);
+            
+            // Close lightbox when clicking outside the image
+            lightbox.addEventListener('click', function(e) {
+                if (e.target === lightbox) {
+                    closeLightbox();
+                }
+            });
+            
             // Function to load project details (mock data)
             function loadProjectDetails(projectId) {
                 const projects = {
@@ -598,8 +707,8 @@
                         <div class="mb-10">
                             <h3 class="text-xl font-semibold mb-4">Project Gallery</h3>
                             <div class="gallery-grid">
-                                ${project.images.map(img => `
-                                    <img src="${img}" alt="${project.title}" class="rounded-lg shadow-md w-full h-48 object-cover">
+                                ${project.images.map((img, index) => `
+                                    <img src="${img}" alt="${project.title} - Image ${index + 1}" class="rounded-lg shadow-md w-full h-48 object-cover cursor-pointer gallery-image" data-index="${index}">
                                 `).join('')}
                             </div>
                         </div>
@@ -620,6 +729,14 @@
                             </div>
                         </div>
                         
+                        <div class="mb-10">
+                            <h3 class="text-xl font-semibold mb-4">Testimonial</h3>
+                            <div class="bg-white p-6 rounded-lg shadow-md">
+                                <p class="text-gray-700 italic mb-4">"Alex delivered an outstanding website that exceeded our expectations. The attention to detail and user experience focus resulted in a significant increase in our conversion rates."</p>
+                                <p class="font-semibold">- Sarah Thompson, CEO of TechStartup</p>
+                            </div>
+                        </div>
+                        
                         <div>
                             <h3 class="text-xl font-semibold mb-4">Project Documentation</h3>
                             <a href="${project.pdf}" class="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition duration-300 inline-flex items-center">
@@ -627,6 +744,15 @@
                             </a>
                         </div>
                     `;
+                    
+                    // Add event listeners to gallery images
+                    const galleryImages = document.querySelectorAll('.gallery-image');
+                    galleryImages.forEach(img => {
+                        img.addEventListener('click', function() {
+                            const index = parseInt(this.getAttribute('data-index'));
+                            openLightbox(project.images, index);
+                        });
+                    });
                 }
             }
             
